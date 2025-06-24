@@ -2,10 +2,10 @@ from shiny import reactive, render, ui
 import seaborn as sb
 import matplotlib.pyplot as plt
 from shared import df
-# from ridgeplot import ridgeplot
 
 def app_server(input, output, session):
 
+	# Filters data by city, by age and by time according to selection
 	@reactive.calc
 	def filtered_df():
 		filt_df = df[df["libelle_commune"].isin(input.city())]
@@ -55,6 +55,7 @@ def app_server(input, output, session):
 			rate = (partial / pop) * 100
 		return f"{partial} ({rate:.1f}%)"
 
+	# Determines the total selected population
 	@render.text
 	def show_total_population():
 		if "TOUT_AGE" in input.age():
@@ -63,10 +64,7 @@ def app_server(input, output, session):
 			count =filtered_df().groupby(["libelle_commune", "classe_age"])["population_carto"].max().sum()
 		return f"{count} people selected"
 
-	@render.text
-	def bill_depth():
-		return f"{filtered_df()['bill_depth_mm'].mean():.1f} mm"
-
+	# Adds a filter : when "TOUT_AGE" is selected, no other age classes can be selected
 	@reactive.Effect
 	def age_filter():
 		selected = input.age()
